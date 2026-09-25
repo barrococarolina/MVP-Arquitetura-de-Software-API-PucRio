@@ -2,7 +2,7 @@
 
 Este projeto é a componente de Back-End do MVP da Sprint **Arquitetura de Software** do Curso de Engenharia de Software da PUC-Rio.
 
-O MVP é composto de um Back-End com API REST desenvolvida em Python com Flask para o gerenciamento de **alunos e turmas escolares**. A aplicação utiliza **SQLite** para persistência, disponibiliza documentação OpenAPI/Swagger e integra uma **API externa pública (ViaCEP)** para consultar e tratar endereços a partir do CEP informado no cadastro de alunos. A parte do front-end pode ser acessada em [MVP-Arquitetura-de-Software-Interface](https://github.com/barrococarolina/MVP-Arquitetura-de-Software-Interface).
+O MVP é composto de um Back-End com API REST desenvolvida em Python com Flask para o gerenciamento de **alunos e turmas escolares**. A aplicação utiliza **SQLite** para persistência, disponibiliza documentação OpenAPI/Swagger e integra uma **API externa pública (ViaCEP)** para consultar e tratar endereços a partir do CEP informado no cadastro de alunos. A parte do front-end pode ser acessada em [MVP-Arquitetura-de-Software-Interface-PucRio](https://github.com/barrococarolina/MVP-Arquitetura-de-Software-Interface-PucRio).
 
 ## Arquitetura
 
