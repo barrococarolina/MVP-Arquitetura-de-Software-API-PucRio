@@ -54,7 +54,7 @@ A API principal utiliza os campos retornados pelo serviço (`logradouro`, `bairr
 
 | Método | Rota | Função |
 |---|---|---|
-| GET | `/aluno` | Lista alunos; aceita `busca`, `turmaId` e `ordenar` |
+| GET | `/aluno` | Lista alunos; aceita `buscaNome`, `turmaId` e `ordenar` |
 | GET | `/aluno/{id}` | Consulta um aluno pelo ID |
 | POST | `/aluno` | Cadastra aluno e consulta o ViaCEP |
 | PUT | `/aluno/{id}` | Edita um aluno e atualiza o endereço pelo ViaCEP |
