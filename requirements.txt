@@ -1,6 +1,7 @@
 Flask>=3.0,<4.0
-flask-openapi3>=4.0,<5.0
+flask-openapi3[swagger]>=4.0,<5.0
 Flask-Cors>=4.0,<7.0
-SQLAlchemy>=2.0,<3.0
+SQLAlchemy>=1.4,<2.0
+sqlalchemy-utils
 pydantic>=2.0,<3.0
 requests>=2.31,<3.0

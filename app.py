@@ -95,20 +95,28 @@ def validar_turma(session, turma_id: int):
 
 @app.get("/", tags=[home_tag])
 def home():
+    """Redireciona para /openapi, tela que permite a escolha do estilo de documentação.
+    """
     return redirect("/openapi")
 
 
 @app.post("/aluno", tags=[aluno_tag], responses={"200": AlunoViewSchema, "400": ErrorSchema, "409": ErrorSchema})
-def add_aluno(form: AlunoSchema):
+def add_aluno(body: AlunoSchema):
+    """Adiciona um novo Aluno à base de dados.
+
+    Só permite o cadastro se a turma informada existir.
+
+    Retorna uma representação dos alunos e turmas associados.
+    """
     session = Session()
     try:
-        validar_turma(session, form.turmaId)
-        endereco = consultar_viacep(form.cep)
+        validar_turma(session, body.turmaId)
+        endereco = consultar_viacep(body.cep)
         aluno = Aluno(
-            nome=form.nome,
-            email=form.email,
-            faltas=form.faltas,
-            turmaId=form.turmaId,
+            nome=body.nome,
+            email=body.email,
+            faltas=body.faltas,
+            turmaId=body.turmaId,
             **endereco,
         )
         session.add(aluno)
@@ -133,17 +141,18 @@ def add_aluno(form: AlunoSchema):
 
 @app.get("/aluno", tags=[aluno_tag], responses={"200": ListagemAlunosSchema})
 def get_alunos(query: AlunoFiltroSchema):
-    """Lista alunos e permite busca por nome/email e filtro por turma."""
+    """Faz a busca por todos os alunos cadastrados e permite busca por nome/email e filtro por turma.
+    """
     # O endpoint mantém compatibilidade com GET /aluno sem parâmetros.
     session = Session()
     try:
-        busca = (query.busca or "").strip()
+        busca_nome = (query.buscaNome or "").strip()
         turma_id = query.turmaId
         ordenacao = query.ordenar
 
         consulta = session.query(Aluno)
-        if busca:
-            termo = f"%{busca}%"
+        if busca_nome:
+            termo = f"%{busca_nome}%"
             consulta = consulta.filter(or_(Aluno.nome.ilike(termo), Aluno.email.ilike(termo)))
         if turma_id:
             consulta = consulta.filter(Aluno.turmaId == turma_id)
@@ -160,6 +169,10 @@ def get_alunos(query: AlunoFiltroSchema):
 
 @app.get("/aluno/<int:id>", tags=[aluno_tag], responses={"200": AlunoViewSchema, "404": ErrorSchema})
 def get_aluno_id(path: AlunoBuscaIdSchema):
+    """Faz a busca por um Aluno a partir do id do aluno.
+
+    Retorna uma representação do aluno selecionado.
+    """
     session = Session()
     try:
         aluno = session.query(Aluno).filter(Aluno.id == path.id).first()
@@ -171,20 +184,22 @@ def get_aluno_id(path: AlunoBuscaIdSchema):
 
 
 @app.put("/aluno/<int:id>", tags=[aluno_tag], responses={"200": AlunoViewSchema, "400": ErrorSchema, "404": ErrorSchema, "409": ErrorSchema})
-def update_aluno(path: AlunoBuscaIdSchema, form: AlunoSchema):
+def update_aluno(path: AlunoBuscaIdSchema, body: AlunoSchema):
+    """Atualiza os dados de um Aluno
+    """
     session = Session()
     try:
         aluno = session.query(Aluno).filter(Aluno.id == path.id).first()
         if not aluno:
             return {"message": "Aluno não encontrado."}, 404
 
-        validar_turma(session, form.turmaId)
-        endereco = consultar_viacep(form.cep)
+        validar_turma(session, body.turmaId)
+        endereco = consultar_viacep(body.cep)
 
-        aluno.nome = form.nome.strip()
-        aluno.email = form.email.strip()
-        aluno.faltas = form.faltas
-        aluno.turmaId = form.turmaId
+        aluno.nome = body.nome.strip()
+        aluno.email = body.email.strip()
+        aluno.faltas = body.faltas
+        aluno.turmaId = body.turmaId
         aluno.cep = endereco.get("cep") if endereco else None
         aluno.logradouro = endereco.get("logradouro") if endereco else None
         aluno.bairro = endereco.get("bairro") if endereco else None
@@ -208,6 +223,10 @@ def update_aluno(path: AlunoBuscaIdSchema, form: AlunoSchema):
 
 @app.delete("/aluno/<int:id>", tags=[aluno_tag], responses={"200": AlunoDeleteSchema, "404": ErrorSchema})
 def del_aluno(path: AlunoBuscaIdSchema):
+    """Deleta um aluno a partir do id de aluno informado
+
+    Retorna uma mensagem de confirmação da remoção.
+    """
     session = Session()
     try:
         aluno = session.query(Aluno).filter(Aluno.id == path.id).first()
@@ -222,10 +241,14 @@ def del_aluno(path: AlunoBuscaIdSchema):
 
 
 @app.post("/turma", tags=[turma_tag], responses={"200": TurmaViewSchema, "400": ErrorSchema, "409": ErrorSchema})
-def add_turma(form: TurmaSchema):
+def add_turma(body: TurmaSchema):
+    """Adiciona uma nova turma à base de dados
+
+    Retorna uma representação das turmas.
+    """
     session = Session()
     try:
-        turma = Turma(nome=form.nome, ativo=form.ativo)
+        turma = Turma(nome=body.nome, ativo=body.ativo)
         session.add(turma)
         session.commit()
         return apresenta_turma(turma), 200
@@ -242,6 +265,10 @@ def add_turma(form: TurmaSchema):
 
 @app.get("/turma", tags=[turma_tag], responses={"200": ListagemTurmaSchema})
 def get_turmas():
+    """Faz a busca por todas as turmas cadastradas
+
+    Retorna uma representação da listagem de turmas.
+    """
     session = Session()
     try:
         turmas = session.query(Turma).order_by(Turma.nome.asc()).all()
@@ -252,6 +279,8 @@ def get_turmas():
 
 @app.get("/turma/<int:id>", tags=[turma_tag], responses={"200": TurmaViewSchema, "404": ErrorSchema})
 def get_turma_id(path: TurmaBuscaIdSchema):
+    """Faz a busca por uma turma a partir do id da turma.
+    """
     session = Session()
     try:
         turma = session.query(Turma).filter(Turma.id == path.id).first()
@@ -263,14 +292,16 @@ def get_turma_id(path: TurmaBuscaIdSchema):
 
 
 @app.put("/turma/<int:id>", tags=[turma_tag], responses={"200": TurmaViewSchema, "404": ErrorSchema, "409": ErrorSchema})
-def update_turma(path: TurmaBuscaIdSchema, form: TurmaSchema):
+def update_turma(path: TurmaBuscaIdSchema, body: TurmaSchema):
+    """Atualiza os dados de uma turma
+    """
     session = Session()
     try:
         turma = session.query(Turma).filter(Turma.id == path.id).first()
         if not turma:
             return {"message": "Turma não encontrada."}, 404
-        turma.nome = form.nome.strip()
-        turma.ativo = form.ativo
+        turma.nome = body.nome.strip()
+        turma.ativo = body.ativo
         session.commit()
         return apresenta_turma(turma), 200
     except IntegrityError:
@@ -282,6 +313,12 @@ def update_turma(path: TurmaBuscaIdSchema, form: TurmaSchema):
 
 @app.delete("/turma/<int:id>", tags=[turma_tag], responses={"200": TurmaDeleteSchema, "400": ErrorSchema, "404": ErrorSchema})
 def del_turma(path: TurmaBuscaIdSchema):
+    """Deleta uma turma a partir do id de turma informado
+
+    Só permite a deleção se não houver alunos cadastrados na turma.
+
+    Retorna uma mensagem de confirmação da remoção se tudo correr certo.
+    """
     session = Session()
     try:
         turma = session.query(Turma).filter(Turma.id == path.id).first()

@@ -18,7 +18,7 @@ class ListagemTurmaSchema(BaseModel):
 
 
 class TurmaBuscaIdSchema(BaseModel):
-    id: int = Field(gt=0, examples=[1])
+    id: int = Field(gt=0, examples={"example": {"value": 1}})
 
 
 class TurmaDeleteSchema(BaseModel):

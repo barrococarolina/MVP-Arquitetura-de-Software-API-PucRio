@@ -7,17 +7,17 @@ class AlunoSchema(BaseModel):
     email: str = Field(min_length=5, max_length=255, examples=["maria@email.com"])
     faltas: int = Field(default=0, ge=0, examples=[2])
     turmaId: int = Field(gt=0, examples=[1])
-    cep: str | None = Field(default=None, examples=["22790000"])
+    cep: str | None = Field(default=None, examples=["22790000"], coerce_numbers_to_str=True)
 
 
 class AlunoFiltroSchema(BaseModel):
-    busca: str | None = None
+    buscaNome: str | None = None
     turmaId: int | None = Field(default=None, gt=0)
     ordenar: str = "nome"
 
 
 class AlunoBuscaIdSchema(BaseModel):
-    id: int = Field(gt=0, examples=[1])
+    id: int = Field(gt=0, examples={"example": {"value": 1}})
 
 
 class AlunoViewSchema(BaseModel):
